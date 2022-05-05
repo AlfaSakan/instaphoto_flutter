@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import '../models/models.dart';
+import 'package:instaphoto_flutter/widgets/widgets.dart';
+import '../arguments/arguments.dart';
 
 class PostPage extends StatefulWidget {
   static const routeName = 'PostPage';
@@ -10,10 +11,13 @@ class PostPage extends StatefulWidget {
 }
 
 class _PostPageState extends State<PostPage> {
+  bool isLikePost = false;
+
   @override
   Widget build(BuildContext context) {
     final args =
         ModalRoute.of(context)!.settings.arguments as PostPageArguments;
+
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
@@ -24,44 +28,36 @@ class _PostPageState extends State<PostPage> {
           },
           icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
         ),
+        title: const Text(
+          'Posts',
+          style: TextStyle(
+            color: Colors.black,
+            fontWeight: FontWeight.bold,
+            fontSize: 20,
+          ),
+        ),
+        titleSpacing: 0,
+        centerTitle: false,
       ),
       body: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 20),
         color: Colors.white,
         child: ListView(
           children: [
-            Image.network(
-              args.imagePost,
-              fit: BoxFit.contain,
-            ),
-            const SizedBox(height: 5),
-            Text(args.user.name),
-            const SizedBox(height: 8),
-            Text(
-              args.post.title,
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 18,
-              ),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              args.post.body,
-              style: const TextStyle(
-                color: Colors.grey,
-              ),
+            PostCard(
+              profilePict: args.imageProfile,
+              user: args.user,
+              post: args.post,
+              imagePost: args.imagePost,
+              isLike: isLikePost,
+              onTapLike: (boolValue) {
+                setState(() {
+                  isLikePost = boolValue;
+                });
+              },
             ),
           ],
         ),
       ),
     );
   }
-}
-
-class PostPageArguments {
-  final Post post;
-  final User user;
-  final String imagePost;
-
-  PostPageArguments(this.post, this.user, this.imagePost);
 }

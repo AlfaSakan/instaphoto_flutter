@@ -2,8 +2,10 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'pages.dart';
 
-import '../arguments/user_feed_arguments.dart';
+import '../arguments/arguments.dart';
+import '../widgets/widgets.dart';
 import '../models/models.dart';
 
 class UserFeedPage extends StatelessWidget {
@@ -33,6 +35,14 @@ class UserFeedPage extends StatelessWidget {
       return posts;
     }
 
+    Future getFollowers() async {
+      return null;
+    }
+
+    Future getFollowings() async {
+      return null;
+    }
+
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
@@ -44,36 +54,64 @@ class UserFeedPage extends StatelessWidget {
             fontWeight: FontWeight.bold,
           ),
         ),
-        centerTitle: true,
+        titleSpacing: 0,
+        centerTitle: false,
         leading: IconButton(
           onPressed: () {
             Navigator.pop(context);
           },
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
+          icon: const Icon(
+            Icons.arrow_back_ios,
+            color: Colors.black,
+          ),
         ),
       ),
       body: Container(
         color: Colors.white,
         child: ListView(
           children: [
-            ListTile(
-              leading: ClipRRect(
-                borderRadius: BorderRadius.circular(30),
-                child: Image.network(
-                  args.profilePict,
-                  width: 40,
-                  height: 40,
-                ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(30),
+                        child: Image.network(
+                          args.profilePict,
+                          width: 60,
+                          height: 60,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        args.user.name,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w500,
+                          color: Colors.black,
+                        ),
+                      ),
+                    ],
+                  ),
+                  ProfileTag(
+                    future: getUserFeed(),
+                    tag: 'Posts',
+                  ),
+                  ProfileTag(
+                    future: getFollowers(),
+                    tag: 'Followers',
+                  ),
+                  ProfileTag(
+                    future: getFollowings(),
+                    tag: 'Following',
+                  ),
+                ],
               ),
-              title: Text(
-                args.user.name,
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
-              ),
-              subtitle: Text(args.user.username),
             ),
+            const SizedBox(height: 20),
             FutureBuilder(
               future: getUserFeed(),
               builder: (context, AsyncSnapshot snapshot) {
@@ -84,48 +122,42 @@ class UserFeedPage extends StatelessWidget {
                 }
 
                 final feedWidget = snapshot.data.map(
-                  (feed) {
+                  (Post feed) {
                     String imagePost =
                         'https://picsum.photos/1000?image=${feed.id + 1}';
 
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Image.network(
-                          imagePost,
-                          fit: BoxFit.contain,
-                          width: double.infinity,
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 20,
-                            vertical: 10,
+                    return InkWell(
+                      onTap: () {
+                        Navigator.pushNamed(
+                          context,
+                          PostPage.routeName,
+                          arguments: PostPageArguments(
+                            feed,
+                            args.user,
+                            imagePost,
+                            args.profilePict,
                           ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                feed.title,
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                feed.body,
-                              ),
-                            ],
-                          ),
-                        )
-                      ],
+                        );
+                      },
+                      child: Image.network(
+                        imagePost,
+                        fit: BoxFit.contain,
+                        width: (MediaQuery.of(context).size.width / 3) - 2,
+                      ),
                     );
                   },
                 ).toList();
 
-                return Column(
+                return Wrap(
+                  spacing: 2,
+                  runSpacing: 2,
+                  alignment: WrapAlignment.spaceBetween,
                   children: [
                     ...feedWidget,
                   ],
                 );
               },
-            )
+            ),
           ],
         ),
       ),

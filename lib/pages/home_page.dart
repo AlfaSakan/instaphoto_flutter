@@ -1,12 +1,10 @@
 import 'dart:convert';
 
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+
+import '../widgets/widgets.dart';
 import '../models/models.dart';
-import '../pages/pages.dart';
-import '../pages/user_feed_page.dart';
-import '../arguments/user_feed_arguments.dart';
 
 class HomePage extends StatefulWidget {
   static const routeName = 'HomePage';
@@ -18,6 +16,8 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  Map<String, bool> isLikePost = {};
+
   Future getPostData() async {
     var response =
         await http.get(Uri.https('jsonplaceholder.typicode.com', 'posts'));
@@ -60,7 +60,7 @@ class _HomePageState extends State<HomePage> {
             fontWeight: FontWeight.bold,
           ),
         ),
-        centerTitle: true,
+        centerTitle: false,
       ),
       body: Container(
         color: Colors.white,
@@ -81,6 +81,7 @@ class _HomePageState extends State<HomePage> {
                     child: Text('Loading...'),
                   );
                 }
+
                 return ListView.builder(
                   itemCount: snapshot.data.length,
                   itemBuilder: (context, index) {
@@ -89,107 +90,19 @@ class _HomePageState extends State<HomePage> {
                     String profilePict =
                         'https://picsum.photos/1000?image=${snapshot.data[index].userId + 10}';
 
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.pushNamed(
-                              context,
-                              UserFeedPage.routeName,
-                              arguments: UserFeedArguments(
-                                snapshotUser.data[snapshot.data[index].userId],
-                                profilePict,
-                              ),
-                            );
-                          },
-                          child: Padding(
-                            padding: const EdgeInsets.only(
-                              left: 15,
-                              right: 15,
-                              bottom: 10,
-                            ),
-                            child: Row(
-                              children: [
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(20),
-                                  child: Image.network(
-                                    profilePict,
-                                    height: 25,
-                                    width: 25,
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  '${snapshotUser.data[snapshot.data[index].userId].username}',
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 14,
-                                    color: Colors.black,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        InkWell(
-                          onTap: () {
-                            Navigator.pushNamed(
-                              context,
-                              PostPage.routeName,
-                              arguments: PostPageArguments(
-                                snapshot.data[index],
-                                snapshotUser.data[snapshot.data[index].userId],
-                                imagePost,
-                              ),
-                            );
-                          },
-                          child: Image.network(
-                            imagePost,
-                            fit: BoxFit.cover,
-                            // height: 250,
-                            width: double.infinity,
-                          ),
-                        ),
-                        const SizedBox(height: 5),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 15),
-                          child: RichText(
-                            text: TextSpan(
-                              recognizer: TapGestureRecognizer()
-                                ..onTap = () {
-                                  Navigator.pushNamed(
-                                    context,
-                                    PostPage.routeName,
-                                    arguments: PostPageArguments(
-                                      snapshot.data[index],
-                                      snapshotUser
-                                          .data[snapshot.data[index].userId],
-                                      imagePost,
-                                    ),
-                                  );
-                                },
-                              text:
-                                  '${snapshotUser.data[snapshot.data[index].userId].username}. ',
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 14,
-                                color: Colors.black,
-                              ),
-                              children: [
-                                TextSpan(
-                                  text: snapshot.data[index].title,
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.normal,
-                                    fontSize: 14,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 20),
-                      ],
+                    return PostCard(
+                      profilePict: profilePict,
+                      user: snapshotUser.data[snapshot.data[index].userId],
+                      post: snapshot.data[index],
+                      imagePost: imagePost,
+                      isLike: isLikePost[snapshot.data[index].id.toString()] ??
+                          false,
+                      onTapLike: (boolValue) {
+                        setState(() {
+                          isLikePost.addAll(
+                              {snapshot.data[index].id.toString(): boolValue});
+                        });
+                      },
                     );
                   },
                 );
