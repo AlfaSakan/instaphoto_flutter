@@ -170,6 +170,15 @@ class ProfilePage extends StatelessWidget {
                         if (snapshot.data == null) {
                           return const Text('Loading...');
                         }
+                        var snapshotData = snapshot.data;
+                        User userData = User(
+                          snapshotData['id'],
+                          snapshotData['name'],
+                          snapshotData['username'],
+                          snapshotData['email'],
+                          snapshotData['phone'],
+                        );
+
                         return InkWell(
                           onTap: () {
                             Navigator.pushNamed(
@@ -177,7 +186,7 @@ class ProfilePage extends StatelessWidget {
                               PostPage.routeName,
                               arguments: PostPageArguments(
                                 feed,
-                                snapshot.data as User,
+                                userData,
                                 imagePost,
                                 profilePict,
                               ),
